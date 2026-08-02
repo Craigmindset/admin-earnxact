@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-black: #050505;
+  --brand-surface-1: #090909;
+  --brand-surface-2: #0d0d0d;
+  --brand-card-1: #111111;
+  --brand-card-2: #151515;
+  --brand-gold: #f4a300;
+  --brand-smoky-white: #edeae3;
+}
+
+/* ── Mobile UX foundations ── */
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  font-family: var(--font-poppins), var(--font-inter), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: var(--brand-black);
+  color: white;
+}
+
+/* Eliminate 300 ms tap delay on iOS/Android */
+button,
+a,
+select,
+input,
+textarea,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+/* Prevent iOS Safari from auto-zooming into focused inputs (font < 16 px triggers zoom) */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 1rem;
+  }
+}
+
+.font-display {
+  font-family: var(--font-poppins), var(--font-inter), sans-serif;
+}
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-up {
+  animation: fadeUp 520ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up {
+    animation: none;
+  }
+}
