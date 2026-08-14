@@ -88,7 +88,14 @@ export default function AdminSidebar({
               }`}
             >
               <Icon className="text-lg shrink-0" />
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              {!collapsed && (
+                <span className="flex-1 truncate">{item.label}</span>
+              )}
+              {!collapsed && item.hot && (
+                <span className="shrink-0 rounded bg-red-500 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                  Hot
+                </span>
+              )}
             </Link>
           );
         })}

@@ -194,6 +194,18 @@ export type Database = {
         };
         Returns: AdminTransactionRow[];
       };
+      get_admin_signup_trend: {
+        Args: Record<string, never>;
+        Returns: { period: string; user_count: number }[];
+      };
+      get_admin_plan_distribution: {
+        Args: Record<string, never>;
+        Returns: { plan_name: string; user_count: number }[];
+      };
+      get_admin_top_amounts: {
+        Args: Record<string, never>;
+        Returns: { label: string; amount: number }[];
+      };
     };
     Enums: Record<string, never>;
   };
