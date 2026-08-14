@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { MdChevronLeft, MdChevronRight } from "react-icons/md";
+import { usePathname, useRouter } from "next/navigation";
+import { MdChevronLeft, MdChevronRight, MdLogout } from "react-icons/md";
 import { FiX } from "react-icons/fi";
 import { ADMIN_NAV_ITEMS } from "@/components/dashboard/nav-data";
+import { logout } from "@/lib/logout";
 
 type AdminSidebarProps = {
   collapsed: boolean;
@@ -20,6 +21,14 @@ export default function AdminSidebar({
   onCloseMobile
 }: AdminSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    onCloseMobile();
+    await logout();
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
     <aside
@@ -84,6 +93,21 @@ export default function AdminSidebar({
           );
         })}
       </nav>
+
+      <div className="border-t border-white/10 p-3">
+        <button
+          type="button"
+          onClick={handleLogout}
+          title={collapsed ? "Logout" : undefined}
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/70 transition hover:bg-red-500/10 hover:text-red-300 ${
+            collapsed ? "justify-center" : ""
+          }`}
+        >
+          <MdLogout className="text-lg shrink-0" />
+          {!collapsed && <span className="truncate">Logout</span>}
+        </button>
+      </div>
     </aside>
+
   );
 }

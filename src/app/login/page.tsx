@@ -1,14 +1,30 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { MdAdminPanelSettings, MdVisibility, MdVisibilityOff } from "react-icons/md";
+import { createClient } from "@/lib/supabase/client";
 
 export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminLoginForm />
+    </Suspense>
+  );
+}
+
+function AdminLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(
+    searchParams.get("error") === "not_authorized"
+      ? "That account isn't authorized for admin access."
+      : null
+  );
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-[var(--brand-black)]">
@@ -34,13 +50,45 @@ export default function AdminLoginPage() {
 
           <form
             className="mt-6 space-y-4"
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
+              if (isSubmitting) return;
 
-              // Backend/auth integration point:
-              // - Validate admin credentials against your auth provider.
-              // - Store session (httpOnly cookie / JWT) and handle errors.
-              router.push("/dashboard");
+              setErrorMessage(null);
+              setIsSubmitting(true);
+
+              const supabase = createClient();
+              const { data, error } = await supabase.auth.signInWithPassword({
+                email: email.trim(),
+                password
+              });
+
+              if (error) {
+                setIsSubmitting(false);
+                setErrorMessage(error.message);
+                return;
+              }
+
+              // Same Supabase project as earnxact - a valid login only
+              // proves this is a real earnxact account, not that they're
+              // staff. Check user_profile.is_admin before granting access,
+              // and sign back out immediately if it's not set.
+              const { data: profile, error: profileError } = await supabase
+                .from("user_profile")
+                .select("is_admin")
+                .eq("user_id", data.user.id)
+                .single();
+
+              if (profileError || !profile?.is_admin) {
+                await supabase.auth.signOut();
+                setIsSubmitting(false);
+                setErrorMessage("That account isn't authorized for admin access.");
+                return;
+              }
+
+              const redirectTo = searchParams.get("redirectTo");
+              router.push(redirectTo && redirectTo.startsWith("/") ? redirectTo : "/dashboard");
+              router.refresh();
             }}
           >
             <div>
@@ -50,6 +98,7 @@ export default function AdminLoginPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 type="email"
                 required
+                autoComplete="email"
                 placeholder="admin@earnxact.com"
                 className="w-full rounded-md border border-white/10 bg-black/60 px-3 py-2.5 text-sm text-white placeholder:text-white/40 outline-none focus:border-[var(--brand-gold)]"
               />
@@ -63,6 +112,7 @@ export default function AdminLoginPage() {
                   onChange={(event) => setPassword(event.target.value)}
                   type={showPassword ? "text" : "password"}
                   required
+                  autoComplete="current-password"
                   placeholder="Enter password"
                   className="w-full rounded-md border border-white/10 bg-black/60 px-3 py-2.5 pr-10 text-sm text-white placeholder:text-white/40 outline-none focus:border-[var(--brand-gold)]"
                 />
@@ -81,11 +131,18 @@ export default function AdminLoginPage() {
               </div>
             </div>
 
+            {errorMessage ? (
+              <p className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+                {errorMessage}
+              </p>
+            ) : null}
+
             <button
               type="submit"
-              className="w-full rounded-md bg-[var(--brand-smoky-white)] px-4 py-2.5 text-sm font-semibold text-black transition hover:opacity-90"
+              disabled={isSubmitting}
+              className="w-full rounded-md bg-[var(--brand-smoky-white)] px-4 py-2.5 text-sm font-semibold text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Login
+              {isSubmitting ? "Signing in..." : "Login"}
             </button>
           </form>
 

@@ -1,70 +1,76 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { AdminStaffMember } from "@/lib/database.types";
 
-type StaffStatus = "active" | "disabled";
-
-type StaffMember = {
-  name: string;
-  email: string;
-  role: string;
-  status: StaffStatus;
-};
-
-// Backend integration point:
-// - Replace with real admin/staff account data from your admin API.
-const INITIAL_STAFF: StaffMember[] = [
-  { name: "Amaka Obi", email: "amaka@earnxact.com", role: "Super Admin", status: "active" },
-  { name: "Chidi Eze", email: "chidi@earnxact.com", role: "Finance", status: "active" },
-  { name: "Femi Adio", email: "femi@earnxact.com", role: "Support", status: "active" },
-  { name: "Ngozi Bello", email: "ngozi@earnxact.com", role: "Support", status: "disabled" }
-];
-
-function StatusBadge({ status }: { status: StaffStatus }) {
-  return (
-    <span
-      className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${
-        status === "active"
-          ? "bg-emerald-500/10 text-emerald-400"
-          : "bg-red-500/10 text-red-400"
-      }`}
-    >
-      {status}
-    </span>
-  );
+function formatDate(value: string | null | undefined) {
+  if (!value) return "—";
+  return new Date(value).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  });
 }
 
 export default function AccountManagementPage() {
-  const [staff, setStaff] = useState(INITIAL_STAFF);
+  const [staff, setStaff] = useState<AdminStaffMember[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  function toggleStatus(email: string) {
-    setStaff((current) =>
-      current.map((member) =>
-        member.email === email
-          ? { ...member, status: member.status === "active" ? "disabled" : "active" }
-          : member
-      )
-    );
+  async function loadStaff() {
+    const supabase = createClient();
+    const { data, error: rpcError } = await supabase.rpc("get_admin_staff_list");
+
+    if (rpcError) {
+      setError(rpcError.message);
+      setLoading(false);
+      return;
+    }
+
+    setStaff((data ?? []) as AdminStaffMember[]);
+    setError(null);
+    setLoading(false);
   }
+
+  useEffect(() => {
+    loadStaff();
+  }, []);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white md:text-3xl">
-            Account Management
-          </h1>
+          <h1 className="text-2xl font-bold text-white md:text-3xl">Account Management</h1>
           <p className="mt-1 text-sm text-white/50">
-            Manage admin and staff accounts with access to this dashboard.
+            Invite an existing user to the admin dashboard and manage current admin access.
           </p>
         </div>
+      </div>
 
-        <button
-          type="button"
-          className="inline-flex items-center justify-center rounded-lg bg-[var(--brand-gold)] px-4 py-2.5 text-sm font-semibold text-black transition hover:opacity-90"
-        >
-          Invite Staff
-        </button>
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-5 md:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-white">Admin access</h2>
+            <p className="mt-1 text-sm text-white/50">
+              Create a new admin account with Supabase Auth, then this account is automatically flagged as admin.
+            </p>
+          </div>
+
+          <Link
+            href="/dashboard/account-management/create-admin"
+            className="inline-flex items-center justify-center rounded-lg bg-[var(--brand-gold)] px-4 py-2.5 text-sm font-semibold text-black transition hover:opacity-90"
+          >
+            Create Admin Account
+          </Link>
+        </div>
+
+        {error && (
+          <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+            {error}
+          </div>
+        )}
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/5">
@@ -73,28 +79,38 @@ export default function AccountManagementPage() {
             <tr className="border-b border-white/10 text-xs uppercase tracking-wide text-white/50">
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Email</th>
+              <th className="px-4 py-3 font-medium">Joined</th>
               <th className="px-4 py-3 font-medium">Role</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/10">
-            {staff.map((member) => (
-              <tr key={member.email} className="transition hover:bg-white/5">
-                <td className="px-4 py-3 font-medium text-white/80">{member.name}</td>
-                <td className="px-4 py-3 text-white/60">{member.email}</td>
-                <td className="px-4 py-3 text-white/60">{member.role}</td>
-                <td className="px-4 py-3">
-                  <StatusBadge status={member.status} />
+            {loading && (
+              <tr>
+                <td colSpan={4} className="px-4 py-8 text-center text-sm text-white/50">
+                  Loading admin accounts...
                 </td>
-                <td className="px-4 py-3 text-right">
-                  <button
-                    type="button"
-                    onClick={() => toggleStatus(member.email)}
-                    className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/80 transition hover:bg-white/10"
-                  >
-                    {member.status === "active" ? "Disable" : "Enable"}
-                  </button>
+              </tr>
+            )}
+
+            {!loading && staff.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-4 py-8 text-center text-sm text-white/50">
+                  No admin users yet.
+                </td>
+              </tr>
+            )}
+
+            {staff.map((member) => (
+              <tr key={member.user_id} className="transition hover:bg-white/5">
+                <td className="px-4 py-3 font-medium text-white/80">
+                  {member.first_name ?? ""} {member.last_name ?? ""}
+                </td>
+                <td className="px-4 py-3 text-white/60">{member.email}</td>
+                <td className="px-4 py-3 text-white/60">{formatDate(member.created_at)}</td>
+                <td className="px-4 py-3">
+                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
+                    Admin
+                  </span>
                 </td>
               </tr>
             ))}

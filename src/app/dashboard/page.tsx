@@ -1,38 +1,60 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import {
+  MdAccountBalanceWallet,
   MdAttachMoney,
-  MdCardMembership,
   MdGroups,
   MdOutlinePayments,
+  MdOutlineHourglassEmpty,
   MdTrendingUp
 } from "react-icons/md";
 import { CURRENCY_SYMBOL } from "@/lib/currency";
+import { createClient } from "@/lib/supabase/client";
 
-// Backend integration point:
-// - Replace with real aggregate figures from your admin API.
-const STATS = [
+type DashboardStats = {
+  total_users: number;
+  total_pay_in: number;
+  total_payout: number;
+  pending_withdrawals: number;
+  admin_balance: number;
+};
+
+const STAT_CARDS = [
   {
+    key: "total_users" as const,
     label: "Total Users",
-    value: "12,480",
     icon: MdGroups,
-    accent: "border-sky-500/20 bg-sky-500/10 text-sky-400"
+    accent: "border-sky-500/20 bg-sky-500/10 text-sky-400",
+    format: (value: number) => value.toLocaleString()
   },
   {
-    label: "Total Payouts",
-    value: `${CURRENCY_SYMBOL}84,320,000`,
+    key: "total_pay_in" as const,
+    label: "Total Pay-in",
     icon: MdAttachMoney,
-    accent: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+    accent: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+    format: (value: number) => `${CURRENCY_SYMBOL}${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   },
   {
-    label: "Active Task Classes",
-    value: "8",
-    icon: MdCardMembership,
-    accent: "border-[var(--brand-gold)]/20 bg-[var(--brand-gold)]/10 text-[var(--brand-gold)]"
-  },
-  {
-    label: "Pending Withdrawals",
-    value: "36",
+    key: "total_payout" as const,
+    label: "Total Payout",
     icon: MdOutlinePayments,
-    accent: "border-red-500/20 bg-red-500/10 text-red-400"
+    accent: "border-[var(--brand-gold)]/20 bg-[var(--brand-gold)]/10 text-[var(--brand-gold)]",
+    format: (value: number) => `${CURRENCY_SYMBOL}${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  },
+  {
+    key: "pending_withdrawals" as const,
+    label: "Pending Withdrawal",
+    icon: MdOutlineHourglassEmpty,
+    accent: "border-red-500/20 bg-red-500/10 text-red-400",
+    format: (value: number) => value.toLocaleString()
+  },
+  {
+    key: "admin_balance" as const,
+    label: "Admin Balance",
+    icon: MdAccountBalanceWallet,
+    accent: "border-violet-500/20 bg-violet-500/10 text-violet-400",
+    format: (value: number) => `${CURRENCY_SYMBOL}${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   }
 ];
 
@@ -46,7 +68,38 @@ const RECENT_ACTIVITY = [
   { text: "Withdrawal request from \"dailygrind\" flagged for review", time: "5h ago" }
 ];
 
+const REFRESH_INTERVAL_MS = 30_000;
+
 export default function OverviewPage() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const supabase = createClient();
+
+    async function loadStats() {
+      const { data, error: rpcError } = await supabase.rpc("get_admin_dashboard_stats");
+      if (cancelled) return;
+
+      if (rpcError) {
+        setError(rpcError.message);
+        return;
+      }
+
+      setError(null);
+      setStats(data?.[0] ?? null);
+    }
+
+    loadStats();
+    const interval = setInterval(loadStats, REFRESH_INTERVAL_MS);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
   return (
     <div className="space-y-6">
       <div>
@@ -56,14 +109,22 @@ export default function OverviewPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {STATS.map(({ label, value, icon: Icon, accent }) => (
-          <div key={label} className={`rounded-2xl border p-5 ${accent}`}>
+      {error && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          Couldn&apos;t load dashboard stats: {error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {STAT_CARDS.map(({ key, label, icon: Icon, accent, format }) => (
+          <div key={key} className={`rounded-2xl border p-5 ${accent}`}>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
               <Icon className="text-lg" />
               {label}
             </div>
-            <div className="mt-2 text-2xl font-semibold text-white">{value}</div>
+            <div className="mt-2 text-2xl font-semibold text-white">
+              {stats ? format(stats[key]) : "…"}
+            </div>
           </div>
         ))}
       </div>
@@ -91,3 +152,4 @@ export default function OverviewPage() {
     </div>
   );
 }
+
