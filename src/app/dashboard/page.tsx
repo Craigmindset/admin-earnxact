@@ -64,6 +64,19 @@ const STAT_CARDS = [
 
 const REFRESH_INTERVAL_MS = 30_000;
 
+function abbreviatePlanName(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => {
+      const firstLetter = word.match(/[A-Za-z]/)?.[0]?.toUpperCase() ?? "";
+      const digits = word.match(/\d+/)?.[0] ?? "";
+      return `${firstLetter}${digits}`;
+    })
+    .join("") || "N/A";
+}
+
 export default function OverviewPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [signupTrend, setSignupTrend] = useState<SignupTrendRow[]>([]);
@@ -260,7 +273,8 @@ export default function OverviewPage() {
                 const x = 40 + spacing * (idx + 1) - barWidth / 2;
                 const barHeight = maxPlanUsers > 0 ? (row.user_count / maxPlanUsers) * 95 : 0;
                 const y = 110 - barHeight;
-                
+                const shortLabel = abbreviatePlanName(row.plan_name);
+
                 return (
                   <g key={row.plan_name}>
                     {/* Bar with gradient */}
@@ -295,7 +309,7 @@ export default function OverviewPage() {
                       textAnchor="middle"
                       className="fill-white/70 text-[9px] font-medium"
                     >
-                      {row.plan_name.length > 10 ? row.plan_name.substring(0, 9) + '…' : row.plan_name}
+                      {shortLabel}
                     </text>
                   </g>
                 );

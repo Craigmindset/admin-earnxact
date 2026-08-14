@@ -206,6 +206,45 @@ export type Database = {
         Args: Record<string, never>;
         Returns: { label: string; amount: number }[];
       };
+      get_admin_task_submissions: {
+        Args: { p_status?: string | null };
+        Returns: {
+          id: string;
+          user_id: string;
+          user_email: string;
+          user_full_name: string;
+          daily_task_template_id: string;
+          task_title: string;
+          task_description: string;
+          task_reward: number;
+          membership_plan_name: string;
+          screenshot_url: string;
+          status: string;
+          submitted_at: string;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+        }[];
+      };
+      admin_approve_task_submission: {
+        Args: { p_submission_id: string };
+        Returns: void;
+      };
+      admin_approve_all_task_submissions: {
+        Args: Record<string, never>;
+        Returns: { approved_count: number; total_rewarded: number };
+      };
+      get_admin_wallet_overview: {
+        Args: Record<string, never>;
+        Returns: {
+          user_id: string;
+          first_name: string;
+          last_name: string;
+          email: string;
+          membership_plan_name: string;
+          balance: number;
+          created_at: string;
+        }[];
+      };
     };
     Enums: Record<string, never>;
   };

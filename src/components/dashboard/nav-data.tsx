@@ -1,6 +1,7 @@
 import type { IconType } from "react-icons";
 import {
   MdAddTask,
+  MdAssignment,
   MdCardMembership,
   MdFlag,
   MdGroups,
@@ -24,6 +25,12 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { label: "Overview", href: "/dashboard", icon: MdHome },
   { label: "Users", href: "/dashboard/users", icon: MdGroups },
   { label: "Create Task", href: "/dashboard/create-task", icon: MdAddTask },
+  {
+    label: "Task Submission",
+    href: "/dashboard/task-submission",
+    icon: MdAssignment,
+    hot: true
+  },
   {
     label: "Withdrawal Management",
     href: "/dashboard/withdrawal-management",
