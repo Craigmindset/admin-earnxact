@@ -65,8 +65,8 @@ function Avatar({
 }) {
   const dimension = `${size * 0.25}rem`;
   if (avatarUrl) {
-    // eslint-disable-next-line @next/next/no-img-element
     return (
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={avatarUrl}
         alt={`${firstName ?? ""} ${lastName ?? ""}`.trim() || "User avatar"}

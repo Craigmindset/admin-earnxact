@@ -186,6 +186,7 @@ export default function TaskSubmissionPage() {
             >
               {/* Screenshot */}
               <div className="relative aspect-video overflow-hidden rounded-lg bg-black/30">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={submission.screenshot_url}
                   alt="Task submission"
@@ -265,6 +266,7 @@ export default function TaskSubmissionPage() {
           >
             <MdClose className="text-xl" />
           </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={selectedImage}
             alt="Full size screenshot"

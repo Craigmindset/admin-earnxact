@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { MdCheckCircle, MdPendingActions, MdRefresh } from "react-icons/md";
 import { createClient } from "@/lib/supabase/client";
 import type { AdminWithdrawalRow } from "@/lib/database.types";
@@ -48,7 +48,7 @@ export default function WithdrawalManagementPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | WithdrawalStatus>("processing");
 
-  async function loadRequests() {
+  const loadRequests = useCallback(async () => {
     const supabase = createClient();
     const { data, error: rpcError } = await supabase.rpc("get_admin_withdrawal_requests", {
       p_status: statusFilter === "all" ? null : statusFilter
@@ -64,12 +64,12 @@ export default function WithdrawalManagementPage() {
     setRequests((data ?? []) as AdminWithdrawalRow[]);
     setError(null);
     setLoading(false);
-  }
+  }, [statusFilter]);
 
   useEffect(() => {
     setLoading(true);
-    loadRequests();
-  }, [statusFilter]);
+    void loadRequests();
+  }, [loadRequests]);
 
   const visibleCount = useMemo(
     () => requests.filter((request) => statusFilter === "all" || request.status === statusFilter).length,
@@ -124,7 +124,7 @@ export default function WithdrawalManagementPage() {
 
       <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
         <div className="flex flex-wrap gap-2">
-          {(["all", "processing", "completed", "paid"] as const).map((option) => (
+          {(["all", ...STATUS_OPTIONS] as const).map((option) => (
             <button
               key={option}
               type="button"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { CURRENCY_SYMBOL } from "@/lib/currency";
 import { MdOndemandVideo, MdAdd, MdEdit, MdDelete, MdClose } from "react-icons/md";
@@ -40,11 +40,7 @@ export default function WatchAdsManagementPage() {
   });
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchVideos();
-  }, []);
-
-  async function fetchVideos() {
+  const fetchVideos = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -60,7 +56,11 @@ export default function WatchAdsManagementPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [supabase]);
+
+  useEffect(() => {
+    void fetchVideos();
+  }, [fetchVideos]);
 
   function handleAddNew() {
     setEditingVideo(null);
@@ -215,13 +215,14 @@ export default function WatchAdsManagementPage() {
                 {videos.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                      No videos found. Click "Add Video" to create one.
+                      No videos found. Click &quot;Add Video&quot; to create one.
                     </td>
                   </tr>
                 ) : (
                   videos.map((video) => (
                     <tr key={video.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="px-6 py-4 whitespace-nowrap">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={video.thumbnail_url}
                           alt={video.title}
@@ -371,7 +372,7 @@ export default function WatchAdsManagementPage() {
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Actual wallet credit is calculated from the member's plan and daily 60/40 split.
+                    Actual wallet credit is calculated from the member&apos;s plan and daily 60/40 split.
                   </p>
                 </div>
 
