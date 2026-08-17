@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MdAdminPanelSettings, MdLogout, MdNotificationsNone } from "react-icons/md";
+import { MdLogout, MdNotificationsNone } from "react-icons/md";
 import { FiMenu } from "react-icons/fi";
 import { createClient } from "@/lib/supabase/client";
 import { logout } from "@/lib/logout";
@@ -49,14 +50,17 @@ export default function AdminHeader({ onToggleMobileSidebar }: AdminHeaderProps)
         <FiMenu className="text-xl" />
       </button>
 
-      <Link href="/dashboard" className="inline-flex items-center gap-2" aria-label="EarnXact Admin">
-        <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--brand-gold)]/15 text-[var(--brand-gold)]">
-          <MdAdminPanelSettings className="text-lg" />
-        </span>
-        <span className="hidden text-sm font-semibold tracking-wide text-white sm:inline">
-          <span className="text-white">Earn</span>
-          <span className="text-[var(--brand-gold)]">Xact</span>{" "}
-          <span className="text-white/50">Admin</span>
+      <Link href="/dashboard" className="inline-flex items-center gap-3" aria-label="EarnXact Admin">
+        <Image
+          src="/images/earnxact-logo.png"
+          alt="EarnXact Admin"
+          width={160}
+          height={36}
+          priority
+          className="h-8 w-auto sm:h-9"
+        />
+        <span className="hidden rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55 sm:inline-flex">
+          Admin
         </span>
       </Link>
 

@@ -18,6 +18,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "EarnXact Admin",
   description: "Admin dashboard for managing the EarnXact platform",
+  icons: {
+    icon: [{ url: "/images/earnxact-logo.png", type: "image/png" }],
+    shortcut: [{ url: "/images/earnxact-logo.png", type: "image/png" }],
+    apple: [{ url: "/images/earnxact-logo.png", type: "image/png" }]
+  },
 };
 
 export default function RootLayout({

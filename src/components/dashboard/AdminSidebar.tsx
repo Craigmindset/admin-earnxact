@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { MdChevronLeft, MdChevronRight, MdLogout } from "react-icons/md";
 import { FiX } from "react-icons/fi";
 import { ADMIN_NAV_ITEMS } from "@/components/dashboard/nav-data";
 import { logout } from "@/lib/logout";
+import { createClient } from "@/lib/supabase/client";
 
 type AdminSidebarProps = {
   collapsed: boolean;
@@ -22,6 +24,49 @@ export default function AdminSidebar({
 }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [pendingSubmissionCount, setPendingSubmissionCount] = useState(0);
+  const [pendingWithdrawalCount, setPendingWithdrawalCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    const supabase = createClient();
+
+    async function loadPendingSubmissionCount() {
+      const { data, error } = await supabase.rpc("get_admin_task_submissions", {
+        p_status: "pending"
+      });
+
+      if (cancelled || error) {
+        return;
+      }
+
+      setPendingSubmissionCount(Array.isArray(data) ? data.length : 0);
+    }
+
+    async function loadPendingWithdrawalCount() {
+      const { data, error } = await supabase.rpc("get_admin_withdrawal_requests", {
+        p_status: "processing"
+      });
+
+      if (cancelled || error) {
+        return;
+      }
+
+      setPendingWithdrawalCount(Array.isArray(data) ? data.length : 0);
+    }
+
+    void loadPendingSubmissionCount();
+    void loadPendingWithdrawalCount();
+    const interval = window.setInterval(() => {
+      void loadPendingSubmissionCount();
+      void loadPendingWithdrawalCount();
+    }, 30000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, []);
 
   async function handleLogout() {
     onCloseMobile();
@@ -38,10 +83,8 @@ export default function AdminSidebar({
     >
       <div className="flex items-center justify-between gap-2 border-b border-white/10 p-4">
         {!collapsed && (
-          <span className="text-sm font-semibold tracking-wide text-white">
-            <span className="text-white">Earn</span>
-            <span className="text-[var(--brand-gold)]">Xact</span>{" "}
-            <span className="text-white/50">Admin</span>
+          <span className="text-sm font-semibold tracking-wide text-white/60">
+            Navigation
           </span>
         )}
 
@@ -72,6 +115,12 @@ export default function AdminSidebar({
         {ADMIN_NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
+          const pendingBadgeCount =
+            item.href === "/dashboard/task-submission"
+              ? pendingSubmissionCount
+              : item.href === "/dashboard/withdrawal-management"
+                ? pendingWithdrawalCount
+                : 0;
 
           return (
             <Link
@@ -91,9 +140,9 @@ export default function AdminSidebar({
               {!collapsed && (
                 <span className="flex-1 truncate">{item.label}</span>
               )}
-              {!collapsed && item.hot && (
+              {!collapsed && pendingBadgeCount > 0 && (
                 <span className="shrink-0 rounded bg-red-500 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
-                  Hot
+                  {pendingBadgeCount}
                 </span>
               )}
             </Link>
