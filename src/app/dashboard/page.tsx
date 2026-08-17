@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  MdAccountBalanceWallet,
   MdAttachMoney,
   MdGroups,
   MdOutlinePayments,
@@ -52,14 +51,14 @@ const STAT_CARDS = [
     icon: MdOutlineHourglassEmpty,
     accent: "border-red-500/20 bg-red-500/10 text-red-400",
     format: (value: number) => value.toLocaleString()
-  },
-  {
-    key: "admin_balance" as const,
-    label: "Admin Balance",
-    icon: MdAccountBalanceWallet,
-    accent: "border-violet-500/20 bg-violet-500/10 text-violet-400",
-    format: (value: number) => `${CURRENCY_SYMBOL}${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   }
+  // {
+  //   key: "admin_balance" as const,
+  //   label: "Admin Balance",
+  //   icon: MdAccountBalanceWallet,
+  //   accent: "border-violet-500/20 bg-violet-500/10 text-violet-400",
+  //   format: (value: number) => `${CURRENCY_SYMBOL}${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  // }
 ];
 
 const REFRESH_INTERVAL_MS = 30_000;

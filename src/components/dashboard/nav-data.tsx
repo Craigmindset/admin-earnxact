@@ -9,7 +9,6 @@ import {
   MdMoneyOff,
   MdNotificationsNone,
   MdOndemandVideo,
-  MdOutlinePayments,
   MdReceiptLong,
   MdSettings
 } from "react-icons/md";
@@ -38,7 +37,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     hot: true
   },
   { label: "All Transactions", href: "/dashboard/transactions", icon: MdReceiptLong },
-  { label: "Wallet", href: "/dashboard/wallet", icon: MdOutlinePayments },
+  // { label: "Wallet", href: "/dashboard/wallet", icon: MdOutlinePayments },
   // { label: "Mission", href: "/dashboard/mission", icon: MdFlag },
   { label: "Earn Pass", href: "/dashboard/earn-pass", icon: MdCardMembership },
   { label: "Videos Management", href: "/dashboard/watch-ads-management", icon: MdOndemandVideo },
