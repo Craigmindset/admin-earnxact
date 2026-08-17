@@ -72,8 +72,8 @@ export default function CreateTaskPage() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("membership_plans")
-        .select("id, name")
-        .order("name", { ascending: true });
+        .select("id, name, amount, description, is_available, created_at")
+        .order("amount", { ascending: true });
 
       if (error) {
         setErrorMessage(error.message);

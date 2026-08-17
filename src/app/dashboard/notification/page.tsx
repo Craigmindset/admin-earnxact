@@ -29,7 +29,10 @@ export default function NotificationPage() {
     const supabase = createClient();
 
     async function loadPlans() {
-      const { data } = await supabase.from("membership_plans").select("id, name").order("name");
+      const { data } = await supabase
+        .from("membership_plans")
+        .select("id, name, amount, description, is_available, created_at")
+        .order("amount", { ascending: true });
       if (!cancelled && data) setPlans(data);
     }
 

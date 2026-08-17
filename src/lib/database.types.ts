@@ -19,6 +19,10 @@ export type UserProfileRow = {
 export type MembershipPlanRow = {
   id: string;
   name: string;
+  amount: number;
+  description: string | null;
+  is_available: boolean;
+  created_at: string;
 };
 
 export type WatchAdsVideoRow = {
@@ -164,6 +168,10 @@ export type Database = {
           p_target_email?: string | null;
         };
         Returns: number;
+      };
+      admin_set_membership_plan_availability: {
+        Args: { p_plan_id: string; p_is_available: boolean };
+        Returns: void;
       };
       get_admin_users_list: {
         Args: Record<string, never>;
