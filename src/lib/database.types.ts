@@ -21,6 +21,18 @@ export type MembershipPlanRow = {
   name: string;
 };
 
+export type WatchAdsVideoRow = {
+  id: string;
+  title: string;
+  video_url: string;
+  thumbnail_url: string;
+  reward_amount: number;
+  duration: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 /** Row shape returned by the get_admin_users_list() RPC. */
 export type AdminUserListRow = {
   user_id: string;
@@ -121,6 +133,13 @@ export type Database = {
         Row: MembershipPlanRow;
         Insert: never;
         Update: never;
+        Relationships: [];
+      };
+      watch_ads_videos: {
+        Row: WatchAdsVideoRow;
+        Insert: Omit<WatchAdsVideoRow, "id" | "created_at" | "updated_at"> &
+          Partial<Pick<WatchAdsVideoRow, "id" | "created_at" | "updated_at">>;
+        Update: Partial<Omit<WatchAdsVideoRow, "id" | "created_at">>;
         Relationships: [];
       };
     };
