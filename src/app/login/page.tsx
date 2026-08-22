@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MdAdminPanelSettings, MdVisibility, MdVisibilityOff } from "react-icons/md";
@@ -144,6 +145,15 @@ function AdminLoginForm() {
             >
               {isSubmitting ? "Signing in..." : "Login"}
             </button>
+
+            <div className="text-right text-sm">
+              <Link
+                href="/forgot-password"
+                className="text-[var(--brand-gold)] hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
           </form>
 
           <p className="mt-5 text-center text-xs text-white/40">
